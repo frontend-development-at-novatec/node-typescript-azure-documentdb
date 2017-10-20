@@ -1,0 +1,44 @@
+{
+  "name": "typescript-azure-documentdb",
+  "version": "1.0.0",
+  "description": "Small showcase how typescript can simplify the usage of azure documentdb with node.",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "npm run build && node dist/index.js",
+    "build": "npm run ts:lint && npm run ts:build",
+    "ts:lint": "tslint -c tslint.json --type-check --project tsconfig.json",
+    "ts:build": "rimraf dist && tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cg-frontend-development/node-typescript-azure-documentdb.git"
+  },
+  "keywords": [
+    "azure",
+    "typescript",
+    "documentdb",
+    "repository",
+    "nodejs"
+  ],
+  "author": "Janis Koehr",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cg-frontend-development/node-typescript-azure-documentdb/issues"
+  },
+  "homepage": "https://github.com/cg-frontend-development/node-typescript-azure-documentdb#readme",
+  "devDependencies": {
+    "@types/documentdb": "^1.10.2",
+    "@types/documentdb-server": "^0.0.30",
+    "@types/node": "^8.0.46",
+    "rimraf": "^2.6.2",
+    "tslint": "^5.7.0",
+    "tslint-language-service": "^0.9.6",
+    "typescript": "^2.5.3"
+  },
+  "dependencies": {
+    "class-transformer": "^0.1.8",
+    "class-transformer-validator": "^0.4.0",
+    "class-validator": "^0.7.3",
+    "documentdb": "^1.13.0"
+  }
+}
