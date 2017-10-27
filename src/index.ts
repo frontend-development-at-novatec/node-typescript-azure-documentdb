@@ -10,7 +10,13 @@ async function doSomeDatabaseThings(): Promise<void> {
     let user = await UsersRepository.findByKey(key);
 
     if (user !== null) {
-        console.log(`We found a ${user}`);
+        console.log(`We found a ${user}. Update it with a new text.`);
+
+        user = await UsersRepository.update(user, {
+            $set: { text: 'new text' },
+        });
+
+        console.log(`We updated the ${user}`);
     } else {
         console.log(`User with key '${key}' not found.`);
 

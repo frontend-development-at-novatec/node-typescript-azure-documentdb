@@ -52,7 +52,7 @@ export abstract class BaseCRUDRepository<T extends AbstractMeta, U> implements I
     /**
      * The class constructor of the entity that the repository handles.
      */
-    protected classType: new (name: string) => T;
+    protected classType: new (...args: any[]) => T;
 
     /**
      * The collectionId that is set initially.
@@ -65,7 +65,7 @@ export abstract class BaseCRUDRepository<T extends AbstractMeta, U> implements I
      * @param collectionId The collection id.
      * @param classType The class constructor of the entity that the repository handles.
      */
-    constructor(collectionId: string, classType: new (name: string) => T) {
+    constructor(collectionId: string, classType: new (...args: any[]) => T) {
         this.docDbClient = DocumentDbClient;
         this.collectionId = collectionId;
         this.classType = classType;
