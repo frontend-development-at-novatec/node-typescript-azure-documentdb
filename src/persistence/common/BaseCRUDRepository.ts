@@ -216,7 +216,7 @@ export abstract class BaseCRUDRepository<T extends AbstractMeta, U> implements I
             } else {
                 throw new TypeError('The given type is not possible to remove.');
             }
-            return await new Promise<void>((resolve, reject) => {
+            return new Promise<void>((resolve, reject) => {
                 this.docDbClient.deleteDocument(documentLink, (err: QueryError, result) => {
                     if (err) {
                         reject(new DbQueryError(err));
@@ -239,7 +239,7 @@ export abstract class BaseCRUDRepository<T extends AbstractMeta, U> implements I
     public async removeAll(): Promise<void> {
         try {
             await this.evaluateInit();
-            return await new Promise<void>((resolve, reject) => {
+            return new Promise<void>((resolve, reject) => {
                 this.docDbClient.executeStoredProcedure(this.bulkDeleteProcedure!._self, [], (err: QueryError, result: RetrievedDocument) => {
                     if (err) {
                         reject(new DbQueryError(err));
