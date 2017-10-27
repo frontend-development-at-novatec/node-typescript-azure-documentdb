@@ -34,6 +34,6 @@ export interface IUserEntity extends AbstractMeta, NewDocument {
  * The user entity properties that are updatable.
  */
 export interface IUserEntityUpdateProperties {
-    key: string;
-    text: string;
+    key?: string;
+    text?: string;
 }
