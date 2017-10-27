@@ -80,7 +80,7 @@ export class DatabaseUtils {
             query: 'SELECT * FROM root r WHERE r.id=@id',
         };
 
-        return await new Promise<ProcedureMeta>((resolve, reject) => {
+        return new Promise<ProcedureMeta>((resolve, reject) => {
             client.queryStoredProcedures(collectionLink, querySpec).toArray((queryErr: QueryError, resources: ProcedureMeta[]) => {
                 if (queryErr) {
                     reject(queryErr);
@@ -110,7 +110,7 @@ export class DatabaseUtils {
             query: 'SELECT * FROM root r WHERE r.id=@id',
         };
 
-        return await new Promise<ProcedureMeta>((resolve, reject) => {
+        return new Promise<ProcedureMeta>((resolve, reject) => {
             client.queryStoredProcedures(collectionLink, querySpec).toArray((queryErr: QueryError, resources: ProcedureMeta[]) => {
                 if (queryErr) {
                     reject(queryErr);
