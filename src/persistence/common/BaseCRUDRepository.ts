@@ -24,15 +24,15 @@ export abstract class BaseCRUDRepository<T extends AbstractMeta, U> implements I
 
     /**
      * The database this service is running against.
-     * Should not be manipulated in common cases. Is public for testing reasons.
+     * Should not be manipulated in common cases.
      */
-    public database: DatabaseMeta | undefined;
+    protected database: DatabaseMeta | undefined;
 
     /**
      * The collection of this repository.
-     * Should not be manipulated in common cases. Is public for testing reasons.
+     * Should not be manipulated in common cases.
      */
-    public collection: CollectionMeta | undefined;
+    protected collection: CollectionMeta | undefined;
 
     /**
      * The stored procedure reference for updating documents.
@@ -80,6 +80,9 @@ export abstract class BaseCRUDRepository<T extends AbstractMeta, U> implements I
     public async create(obj: T): Promise<T> {
         try {
             await this.evaluateInit();
+            if (obj.id === undefined) {
+                throw new RepositoryError('The id of the given object is undefined: ' + JSON.stringify(obj));
+            }
             const retrieved = await new Promise<RetrievedDocument>((resolve, reject) => {
                 this.docDbClient.createDocument(this.collection!._self, obj, (err: QueryError, result: RetrievedDocument) => {
                     if (err) {
@@ -176,7 +179,7 @@ export abstract class BaseCRUDRepository<T extends AbstractMeta, U> implements I
         try {
             await this.evaluateInit();
             let id: string;
-            if (typeof objOrId === 'object') {
+            if (typeof objOrId === 'object' && objOrId.id !== undefined) {
                 id = objOrId.id;
             } else if (typeof objOrId === 'string') {
                 id = objOrId;
@@ -201,18 +204,16 @@ export abstract class BaseCRUDRepository<T extends AbstractMeta, U> implements I
 
     /**
      * Deletes an object.
-     * @param objOrId The object or id of the object.
+     * @param obj The object or id of the object.
      * @returns {Promise<void>}
      * @throws {RepositoryError | UnexpectedDbError}
      */
-    public async remove(objOrId: T | string): Promise<void> {
+    public async remove(obj: T): Promise<void> {
         try {
             await this.evaluateInit();
             let documentLink: string;
-            if (typeof objOrId === 'object') {
-                documentLink = objOrId._self;
-            } else if (typeof objOrId === 'string') {
-                documentLink = `${this.collection!._self}/docs/${objOrId}`;
+            if (obj._self !== undefined) {
+                documentLink = obj._self;
             } else {
                 throw new TypeError('The given type is not possible to remove.');
             }
@@ -289,7 +290,11 @@ export abstract class BaseCRUDRepository<T extends AbstractMeta, U> implements I
      * @param e Any object mainly a error or array of errors.
      */
     private async checkForValidationErrors(e: any): Promise<boolean> {
-        return (Array.isArray(e) && e.every((error) => error instanceof ValidationError));
+        if (Array.isArray(e) && e.length > 0 && e.every((error) => Array.isArray(error))) {
+            return (await Promise.all((e as any[][]).map((errors: any[]) => this.checkForValidationErrors(errors)))).every((result) => result);
+        } else {
+            return (Array.isArray(e) && e.length > 0 && e.every((error) => error instanceof ValidationError));
+        }
     }
 
     /**

@@ -7,11 +7,10 @@ import { IUpdateCommands } from './stored-procedures/UpdateStoredProcedure';
  * @param <U> Defines the updateable properties of this entity.
  */
 export interface IRepository<T extends AbstractMeta, U> {
-    database: DatabaseMeta | undefined;
-    collection: CollectionMeta | undefined;
     create(obj: T): Promise<T>;
     findOne(id: string): Promise<T | null>;
     findAll(): Promise<T[] | null>;
     update(objOrId: T | string, updateCommands: IUpdateCommands<U>): Promise<T>;
-    remove(objOrId: T | string): Promise<void>;
+    remove(obj: T): Promise<void>;
+    removeAll(): Promise<void>;
 }
