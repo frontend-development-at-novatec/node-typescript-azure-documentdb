@@ -4,12 +4,12 @@ import { DbQueryError } from '../errors/DbQueryError';
 import { UnexpectedDbError } from '../errors/UnexpectedDbError';
 import { BaseCRUDRepository } from './common/BaseCRUDRepository';
 import { IRepository } from './common/IRepository';
-import { IUserEntity, IUserEntityUpdateProperties, UserEntity } from './entities/UserEntity';
+import { IUserEntity, UserEntity } from './entities/UserEntity';
 
 /**
  * The users repository. CRUD operations and more on the UserEntity in the documentdb.
  */
-class UsersRepository extends BaseCRUDRepository<IUserEntity, IUserEntityUpdateProperties> {
+class UsersRepository extends BaseCRUDRepository<IUserEntity> {
 
     constructor() {
         super('users', UserEntity);

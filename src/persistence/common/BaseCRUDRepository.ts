@@ -1,5 +1,5 @@
 import { ClassType, transformAndValidate } from 'class-transformer-validator';
-import { ValidationError } from 'class-validator';
+import { validateOrReject, ValidationError } from 'class-validator';
 import {
     AbstractMeta, CollectionMeta, DatabaseMeta, DocumentClient, NewDocument, ProcedureMeta, QueryError,
     RetrievedDocument, SqlQuerySpec,
@@ -11,7 +11,7 @@ import { UnexpectedDbError } from '../../errors/UnexpectedDbError';
 import { DatabaseUtils } from './DatabaseUtils';
 import DocumentDbClient from './DocumentClientFactory';
 import { IRepository } from './IRepository';
-import { bulkDeleteProc } from './stored-procedures/BulkDeleteStoredProcedure';
+import { bulkDeleteProc, IBulkDeleteResponseBody } from './stored-procedures/BulkDeleteStoredProcedure';
 import { IUpdateCommands, updateProc } from './stored-procedures/UpdateStoredProcedure';
 
 /**
@@ -20,7 +20,7 @@ import { IUpdateCommands, updateProc } from './stored-procedures/UpdateStoredPro
  * @param <T> Defines the entity type and should therefore extend AbstractMeta.
  * @param <U> Defines the updateable properties of this entity.
  */
-export abstract class BaseCRUDRepository<T extends AbstractMeta, U> implements IRepository<T, U> {
+export abstract class BaseCRUDRepository<T extends AbstractMeta> implements IRepository<T> {
 
     /**
      * The database this service is running against.
@@ -80,6 +80,7 @@ export abstract class BaseCRUDRepository<T extends AbstractMeta, U> implements I
     public async create(obj: T): Promise<T> {
         try {
             await this.evaluateInit();
+            await validateOrReject(obj);
             if (obj.id === undefined) {
                 throw new RepositoryError('The id of the given object is undefined: ' + JSON.stringify(obj));
             }
@@ -175,7 +176,7 @@ export abstract class BaseCRUDRepository<T extends AbstractMeta, U> implements I
      * @returns {Promise<T>}
      * @throws {RepositoryError | UnexpectedDbError}
      */
-    public async update(objOrId: T | string, updateCommands: IUpdateCommands<U>): Promise<T> {
+    public async update(objOrId: T | string, updateCommands: IUpdateCommands): Promise<T> {
         try {
             await this.evaluateInit();
             let id: string;
@@ -240,15 +241,17 @@ export abstract class BaseCRUDRepository<T extends AbstractMeta, U> implements I
     public async removeAll(): Promise<void> {
         try {
             await this.evaluateInit();
-            return new Promise<void>((resolve, reject) => {
-                this.docDbClient.executeStoredProcedure(this.bulkDeleteProcedure!._self, [], (err: QueryError, result: RetrievedDocument) => {
+            if (await new Promise<boolean>((resolve, reject) => {
+                this.docDbClient.executeStoredProcedure(this.bulkDeleteProcedure!._self, ['SELECT * FROM root'], (err: QueryError, result: IBulkDeleteResponseBody) => {
                     if (err) {
                         reject(new DbQueryError(err));
                     } else {
-                        resolve();
+                        resolve(result.continuation);
                     }
                 });
-            });
+            })) {
+                await this.removeAll();
+            }
         } catch (e) {
             await this.handleRepositoryErrors(e);
         }

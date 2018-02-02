@@ -29,11 +29,3 @@ export interface IUserEntity extends AbstractMeta, NewDocument {
     date: Date;
     toString(): string;
 }
-
-/**
- * The user entity properties that are updatable.
- */
-export interface IUserEntityUpdateProperties {
-    key?: string;
-    text?: string;
-}
